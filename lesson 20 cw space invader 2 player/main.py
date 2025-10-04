@@ -10,10 +10,10 @@ left = pygame.image.load("left.png")
 left = pygame.transform.scale(left,(70,39))
 right = pygame.image.load("right.png")
 right = pygame.transform.scale(right,(70,35))
-lbullet = pygame.image.load("leftbullet.png")
-lbullet = pygame.transform.scale(lbullet,(10,10))
-rbullet = pygame.image.load("rightbullet.png")
-rbullet = pygame.transform.scale(rbullet,(10,10))
+#lbullet = pygame.image.load("leftbullet.png")
+#lbullet = pygame.transform.scale(lbullet,(10,10))
+#rbullet = pygame.image.load("rightbullet.png")
+#rbullet = pygame.transform.scale(rbullet,(10,10))
 
 #font
 livefont = pygame.font.SysFont("Pixelify Sans",30)
@@ -26,6 +26,8 @@ velbull = 20
 border = pygame.Rect(495,0,10,800)
 lhealth = 10
 rhealth = 10
+lbull = []
+rbull = []
 
 #class for ufo
 class ufo(pygame.sprite.Sprite):
@@ -73,6 +75,47 @@ def window():
     screen.blit(lhetext,(10,10))
     screen.blit(rhetext,(890,10))
 
+#function for bullet
+def bulldraw():
+    for bullet in lbull:
+        pygame.draw.rect(screen,"purple",bullet)
+        bullet.x += velbull
+    for bullet in rbull:
+        pygame.draw.rect(screen,"white",bullet)
+        bullet.x -= velbull
+
+#handling the bullets
+def handle():
+    global lhealth,rhealth
+    for bullet in lbull:
+        if rightt.rect.colliderect(bullet):
+            rhealth -= 1
+            lbull.remove(bullet)
+        elif bullet.x > 1000:
+            lbull.remove(bullet)
+    for bullet in rbull:
+        if leftt.rect.colliderect(bullet):
+            lhealth -= 1
+            rbull.remove(bullet)
+        elif bullet.x < 0:
+            rbull.remove(bullet)
+    for bullet1 in lbull:
+        for bullet2 in rbull:
+            if bullet1.colliderect(bullet2):
+                lbull.remove(bullet1)
+                rbull.remove(bullet2)
+
+#function for winner
+def winner(text):
+    tdraw = overfont.render(text,1,"green")
+    screen.blit(tdraw,(200,263))
+    pygame.display.update()
+    pygame.time.delay(5000)
+    
+
+purplehit = pygame.USEREVENT+1
+whitehit = pygame.USEREVENT+2
+
 clock = pygame.time.Clock()
 run = True
 while run:
@@ -80,27 +123,40 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+        if event.type == KEYDOWN:
+            if event.key == K_BACKSLASH:
+                bullet = pygame.Rect(rightt.rect.x+10,rightt.rect.y+rightt.rect.height//2,20,10)
+                rbull.append(bullet)
+            if event.key == K_z:
+                bullet = pygame.Rect(leftt.rect.x+35,leftt.rect.y+leftt.rect.height//2,20,10)
+                lbull.append(bullet)
     #key pressed detection
     keyp = pygame.key.get_pressed()
     #left player movement
     if keyp[K_w]:
-        leftt.vert(-10)
+        leftt.vert(-5)
     if keyp[K_s]:
-        leftt.vert(10)
+        leftt.vert(5)
     if keyp[K_a]:
-        leftt.hori(-10,1)
+        leftt.hori(-5,1)
     if keyp[K_d]:
-        leftt.hori(10,1)
+        leftt.hori(5,1)
     #right player movement
     if keyp[K_UP]:
-        rightt.vert(-10)
+        rightt.vert(-5)
     if keyp[K_DOWN]:
-        rightt.vert(10)
+        rightt.vert(5)
     if keyp[K_LEFT]:
-        rightt.hori(-10,2)
+        rightt.hori(-5,2)
     if keyp[K_RIGHT]:
-        rightt.hori(10,2)
+        rightt.hori(5,2)
     window()
     ufos.draw(screen)
+    bulldraw()
+    handle()
+    if rhealth == 0:
+        text = "the left player has won !!"
+        winner(text)
+        run = False
     pygame.display.update()
 pygame.quit()
