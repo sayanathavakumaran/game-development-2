@@ -16,8 +16,8 @@ right = pygame.transform.scale(right,(70,35))
 #rbullet = pygame.transform.scale(rbullet,(10,10))
 
 #font
-livefont = pygame.font.SysFont("Pixelify Sans",30)
-overfont = pygame.font.SysFont("Pixelify Sans",50)
+livefont = pygame.font.SysFont("Times New Roman",30)
+overfont = pygame.font.SysFont("Times New Roman",50)
 
 #gaming variables
 fps = 60
@@ -68,12 +68,12 @@ ufos.add(rightt)
 #function for window
 def window():
     screen.blit(bg,(0,0))
-    pygame.draw.rect(screen,"white",border)
+    pygame.draw.rect(screen,"black",border)
     #drawing health
     lhetext = livefont.render("health: "+str(lhealth),1,"white")
     rhetext = livefont.render("health: "+str(rhealth),1,"white")
     screen.blit(lhetext,(10,10))
-    screen.blit(rhetext,(890,10))
+    screen.blit(rhetext,(875,10))
 
 #function for bullet
 def bulldraw():
@@ -107,8 +107,8 @@ def handle():
 
 #function for winner
 def winner(text):
-    tdraw = overfont.render(text,1,"green")
-    screen.blit(tdraw,(200,263))
+    tdraw = overfont.render(text,1,"pink")
+    screen.blit(tdraw,(265,100))
     pygame.display.update()
     pygame.time.delay(5000)
     
@@ -156,6 +156,10 @@ while run:
     handle()
     if rhealth == 0:
         text = "the left player has won !!"
+        winner(text)
+        run = False
+    elif lhealth == 0:
+        text = "the right player has won !!"
         winner(text)
         run = False
     pygame.display.update()
