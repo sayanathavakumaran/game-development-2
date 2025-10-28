@@ -14,7 +14,7 @@ font1 = pygame.font.SysFont("Bauhaus 93",45)
 #gaming variables
 
 groscroll = 0
-scrospeed = 6
+scrospeed = 4
 flying = False
 gameover = False
 pipegap = 150
@@ -49,19 +49,19 @@ class bird(pygame.sprite.Sprite):
         global flying, gameover
         if flying:
             self.velocity += 0.2
-            if self.velocity > 6:
-                self.velocity = 6
+            if self.velocity > 4:
+                self.velocity = 4
             if self.rect.bottom < 700:
                 self.rect.y += int(self.velocity)
         #if game is not over
         if not gameover:
             if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
                 self.clicked = True
-                self.velocity = -10
+                self.velocity = -7
             if pygame.mouse.get_pressed()[0] == 0:
                 self.clicked = False
             #animating the bird
-            flap = 75
+            flap = 40
             self.counter += 1
             if self.counter > flap:
                 self.counter = 0
@@ -91,6 +91,30 @@ class pipes(pygame.sprite.Sprite):
 
 pipegroup = pygame.sprite.Group()
 
+#reset function
+
+def reset():
+    pipegroup.empty()
+    birdd.rect.x = 100
+    birdd.rect.y = 432
+    score = 0
+    return score
+
+class resetbutton():
+    def __init__(self,x,y,image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.center = (x,y)
+    def draw(self):
+        resetclicked = False
+        mousepos = pygame.mouse.get_pos()
+        if self.rect.collidepoint(mousepos):
+            if pygame.mouse.get_pressed()[0] == 1:
+                resetclicked = True
+        screen.blit(self.image,(self.rect.x,self.rect.y))
+        return resetclicked
+    
+resetbuttonn = resetbutton(432,350,restart)
 
 #bird object
 
@@ -101,6 +125,14 @@ birdgroup.add(birdd)
 run = True
 while run:
     clock.tick(fps)
+    #collision detection
+    if pygame.sprite.groupcollide(birdgroup,pipegroup,False,False) or birdd.rect.top<0 or birdd.rect.bottom>700:
+        gameover = True
+    if gameover == True:
+        if resetbuttonn.draw():
+            gameover = False
+            score = reset()
+
     #pipe generation and scrolling
     if flying and not gameover:
         currenttime = pygame.time.get_ticks()
@@ -110,6 +142,7 @@ while run:
             toppipe = pipes(sw,int(sh//2)+pipeheight,1)
             pipegroup.add(bottompipe)
             pipegroup.add(toppipe)
+            lastpipetime = currenttime
         pipegroup.update()
         groscroll -= scrospeed
         if abs(groscroll) > 30:
@@ -121,9 +154,9 @@ while run:
         if event.type == pygame.MOUSEBUTTONDOWN and not flying and not gameover:
             flying = True
     screen.blit(bg,(0,0))
-    birdgroup.draw(screen)
     pipegroup.draw(screen)
-    birdgroup.update()
     screen.blit(ground,(groscroll,600))
+    birdgroup.draw(screen)
+    birdgroup.update()
     pygame.display.update()
 pygame.quit()
