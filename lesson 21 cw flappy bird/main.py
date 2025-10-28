@@ -5,7 +5,9 @@ from pygame.locals import *
 pygame.init()
 clock = pygame.time.Clock()
 fps = 60
-screen = pygame.display.set_mode((864,700))
+sw = 864
+sh = 700
+screen = pygame.display.set_mode((sw,sh))
 pygame.display.set_caption("FLAPPY BIRD")
 font1 = pygame.font.SysFont("Bauhaus 93",45)
 
@@ -79,9 +81,9 @@ class pipes(pygame.sprite.Sprite):
         #position 1 = top, position -1 = bottom
         if updown == 1:
             self.image = pygame.transform.flip(self.image,False,True)
-            self.rect.bottomleft = [x,y-pipegap//2]
+            self.rect.bottomleft = [x,y-int(pipegap/2)]
         elif updown == -1:
-            self.rect.topleft = [x,y+pipegap//2]
+            self.rect.topleft = [x,y+int(pipegap/2)]
     def update(self):
         self.rect.x -= scrospeed
         if self.rect.right < 0:
@@ -104,6 +106,15 @@ while run:
         currenttime = pygame.time.get_ticks()
         if currenttime - lastpipetime > pipefreq:
             pipeheight = random.randint(-100,100)
+            bottompipe = pipes(sw,int(sh//2)+pipeheight,-1)
+            toppipe = pipes(sw,int(sh//2)+pipeheight,1)
+            pipegroup.add(bottompipe)
+            pipegroup.add(toppipe)
+        pipegroup.update()
+        groscroll -= scrospeed
+        if abs(groscroll) > 30:
+            groscroll = 0 
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -111,6 +122,8 @@ while run:
             flying = True
     screen.blit(bg,(0,0))
     birdgroup.draw(screen)
+    pipegroup.draw(screen)
     birdgroup.update()
+    screen.blit(ground,(groscroll,600))
     pygame.display.update()
 pygame.quit()
