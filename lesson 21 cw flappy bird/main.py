@@ -9,7 +9,7 @@ sw = 864
 sh = 700
 screen = pygame.display.set_mode((sw,sh))
 pygame.display.set_caption("FLAPPY BIRD")
-font1 = pygame.font.SysFont("Bauhaus 93",45)
+font1 = pygame.font.SysFont("Bauhaus 93",80)
 
 #gaming variables
 
@@ -51,7 +51,7 @@ class bird(pygame.sprite.Sprite):
             self.velocity += 0.2
             if self.velocity > 4:
                 self.velocity = 4
-            if self.rect.bottom < 700:
+            if self.rect.bottom < 600:
                 self.rect.y += int(self.velocity)
         #if game is not over
         if not gameover:
@@ -72,7 +72,10 @@ class bird(pygame.sprite.Sprite):
             #rotating bird according to movement
             self.image = pygame.transform.rotate(self.images[self.index],self.velocity*-2)
         else:
-            self.image = pygame.transform.rotate(self.images[self.index],-90)
+            if self.rect.bottom > 600:
+                self.image = pygame.transform.rotate(self.images[self.index],0)
+            else:
+                self.image = pygame.transform.rotate(self.images[self.index],-90)
 class pipes(pygame.sprite.Sprite):
     def __init__(self,x,y,updown):
         super().__init__()
@@ -111,7 +114,7 @@ class resetbutton():
         if self.rect.collidepoint(mousepos):
             if pygame.mouse.get_pressed()[0] == 1:
                 resetclicked = True
-        screen.blit(self.image,(self.rect.x,self.rect.y))
+        screen.blit(self.image,(self.rect.x-10,self.rect.y))
         return resetclicked
     
 resetbuttonn = resetbutton(432,350,restart)
@@ -128,10 +131,6 @@ while run:
     #collision detection
     if pygame.sprite.groupcollide(birdgroup,pipegroup,False,False) or birdd.rect.top<0 or birdd.rect.bottom>700:
         gameover = True
-    if gameover == True:
-        if resetbuttonn.draw():
-            gameover = False
-            score = reset()
 
     #pipe generation and scrolling
     if flying and not gameover:
@@ -158,5 +157,19 @@ while run:
     screen.blit(ground,(groscroll,600))
     birdgroup.draw(screen)
     birdgroup.update()
+    if gameover == True:
+        if resetbuttonn.draw():
+            gameover = False
+            score = reset()
+    if len(pipegroup) > 0:
+        birddd = birdgroup.sprites()[0]
+        pipess = pipegroup.sprites()[0]
+        if birddd.rect.left > pipess.rect.left and birddd.rect.right < pipess.rect.right and not birdpasspipe:
+            birdpasspipe = True
+        if birdpasspipe and birddd.rect.left > pipess.rect.right:
+            score += 1
+            birdpasspipe = False
+        text = font1.render(str(score),True,"white")
+        screen.blit(text,(407,20))
     pygame.display.update()
 pygame.quit()
